@@ -12,7 +12,7 @@ export default function Schools() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
-  const [language, setLanguage] = useState('UK');
+  const [language, setLanguage] = useState('GR');
 
   // Extract school types from the data
   const schoolTypes = useMemo(() => {
@@ -40,19 +40,68 @@ export default function Schools() {
     });
   }, [searchTerm, filterType, language]);
 
+  const getSchoolType = (schoolName: string) => {
+    const name = schoolName.toLowerCase();
+    if (name.includes('lyceum')) return 'lyceum';
+    if (name.includes('gymnasium')) return 'gymnasium';
+    if (name.includes('tesek')) return 'tesek';
+    return 'school';
+  };
+
+  const getSchoolTheme = (schoolName: string) => {
+    const type = getSchoolType(schoolName);
+    
+    const themes = {
+      lyceum: {
+        colors: {
+          bg: 'bg-blue-100',
+          text: 'text-blue-600',
+          border: 'border-l-blue-500',
+          hover: 'hover:bg-blue-600',
+          gradient: 'bg-gradient-to-r from-blue-50/50 to-blue-100/50'
+        },
+        badge: { text: 'Lyceum', variant: 'default' }
+      },
+      gymnasium: {
+        colors: {
+          bg: 'bg-green-100',
+          text: 'text-green-600',
+          border: 'border-l-green-500',
+          hover: 'hover:bg-green-600',
+          gradient: 'bg-gradient-to-r from-green-50/50 to-green-100/50'
+        },
+        badge: { text: 'Gymnasium', variant: 'outline' }
+      },
+      tesek: {
+        colors: {
+          bg: 'bg-orange-100',
+          text: 'text-orange-600',
+          border: 'border-l-orange-500',
+          hover: 'hover:bg-orange-600',
+          gradient: 'bg-gradient-to-r from-orange-50/50 to-amber-50/50'
+        },
+        badge: { text: 'TESEK', variant: 'secondary' }
+      },
+      school: {
+        colors: {
+          bg: 'bg-gray-100',
+          text: 'text-gray-600',
+          border: 'border-l-gray-500',
+          hover: 'hover:bg-gray-600',
+          gradient: 'bg-gradient-to-r from-gray-50/50 to-gray-100/50'
+        },
+        badge: { text: 'School', variant: 'secondary' }
+      }
+    };
+
+    return themes[type];
+  };
+
   const getSchoolIcon = (schoolName: string) => {
     const name = schoolName.toLowerCase();
     if (name.includes('lyceum')) return <GraduationCap className="h-5 w-5" />;
     if (name.includes('tesek')) return <BookOpen className="h-5 w-5" />;
     return <School className="h-5 w-5" />;
-  };
-
-  const getSchoolBadge = (schoolName: string) => {
-    const name = schoolName.toLowerCase();
-    if (name.includes('lyceum')) return { text: 'Lyceum', variant: 'default' };
-    if (name.includes('tesek')) return { text: 'TESEK', variant: 'secondary' };
-    if (name.includes('gymnasium')) return { text: 'Gymnasium', variant: 'outline' };
-    return { text: 'School', variant: 'secondary' };
   };
 
   return (
@@ -158,17 +207,17 @@ export default function Schools() {
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {filteredSchools.map((school) => {
-              const badge = getSchoolBadge(school.labelUK);
+              const theme = getSchoolTheme(school.labelUK);
               return (
-                <Card key={school.value} className="hover:shadow-lg justify-between transition-shadow duration-200 border-l-4 border-l-orange-500">
+                <Card key={school.value} className={`hover:shadow-lg justify-between transition-shadow duration-200 border-l-4 ${theme.colors.border}`}>
                   <CardHeader className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
+                        <div className={`p-2 ${theme.colors.bg} rounded-lg ${theme.colors.text}`}>
                           {getSchoolIcon(school.labelUK)}
                         </div>
-                        <Badge variant={badge.variant as 'default' | 'secondary' | 'outline' | 'destructive'}>
-                          {badge.text}
+                        <Badge variant={theme.badge.variant as 'default' | 'secondary' | 'outline' | 'destructive'}>
+                          {theme.badge.text}
                         </Badge>
                       </div>
                     </div>
@@ -176,15 +225,10 @@ export default function Schools() {
                       <CardTitle className="text-lg leading-tight">
                         {language === 'GR' ? school.labelGR : school.labelUK}
                       </CardTitle>
-                      {language === 'UK' && (
-                        <CardDescription className="text-sm text-gray-500 mt-1">
-                          {school.labelGR}
-                        </CardDescription>
-                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button className="w-full hover:bg-orange-600 hover:text-white transition-colors shadow-md" variant="outline">
+                    <Button className={`w-full ${theme.colors.hover} hover:text-white transition-colors shadow-md`} variant="outline">
                       <Users className="h-4 w-4 mr-2" />
                       View Community
                     </Button>
@@ -196,15 +240,15 @@ export default function Schools() {
         ) : (
           <div className="space-y-4">
             {filteredSchools.map((school, index) => {
-              const badge = getSchoolBadge(school.labelUK);
+              const theme = getSchoolTheme(school.labelUK);
               // Alternating row colors for better distinction
               const isEven = index % 2 === 0;
               return (
-                <Card key={school.value} className={`hover:shadow-lg transition-all duration-300 hover:scale-[1.02] ${isEven ? 'bg-white' : 'bg-gradient-to-r from-orange-50/50 to-amber-50/50'} border-l-4 border-l-orange-500`}>
+                <Card key={school.value} className={`hover:shadow-lg transition-all duration-300 hover:scale-[1.02] ${isEven ? 'bg-white' : theme.colors.gradient} border-l-4 ${theme.colors.border}`}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-6">
-                        <div className="p-3 bg-orange-100 rounded-xl text-orange-600 shadow-md">
+                        <div className={`p-3 ${theme.colors.bg} rounded-xl ${theme.colors.text} shadow-md`}>
                           {getSchoolIcon(school.labelUK)}
                         </div>
                         <div className="space-y-1">
@@ -212,18 +256,13 @@ export default function Schools() {
                             <h3 className="font-bold text-xl text-gray-900">
                               {language === 'GR' ? school.labelGR : school.labelUK}
                             </h3>
-                            <Badge variant={badge.variant as 'default' | 'secondary' | 'outline' | 'destructive'}>
-                              {badge.text}
+                            <Badge variant={theme.badge.variant as 'default' | 'secondary' | 'outline' | 'destructive'}>
+                              {theme.badge.text}
                             </Badge>
                             <span className="text-xs text-gray-400 font-mono bg-gray-100 px-2 py-1 rounded">
                               #{school.value}
                             </span>
                           </div>
-                          {language === 'UK' && (
-                            <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded-md max-w-md">
-                              {school.labelGR}
-                            </p>
-                          )}
                           <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
                             <span className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
@@ -236,7 +275,7 @@ export default function Schools() {
                           </div>
                         </div>
                       </div>
-                      <Button variant="outline" size="lg" className="hover:bg-orange-600 hover:text-white transition-colors shadow-md">
+                      <Button variant="outline" size="lg" className={`${theme.colors.hover} hover:text-white transition-colors shadow-md`}>
                         <Users className="h-4 w-4 mr-2" />
                         View Community
                       </Button>

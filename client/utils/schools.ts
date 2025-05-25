@@ -32,7 +32,6 @@ export const schools: School[] = [
   { value: "25", labelGR: "ΓΥΜΝΑΣΙΟ ΥΨΩΝΑ", labelUK: "Ypsonas Gymnasium" },
   { value: "26", labelGR: "Γυμνάσιο-Λύκειο Ειρήνης και Ελευθερίας Δερύνειας-Σωτήρας", labelUK: "Gymnasium-Lyceum of Peace & Freedom Deryneia-Sotira" },
   { value: "27", labelGR: "Γυμνασίου Καλογερόπουλου", labelUK: "Kalogeropoulos Gymnasium" },
-  { value: "28", labelGR: "Έργα Πληροφορικής", labelUK: "Informatics Projects" },
   { value: "29", labelGR: "ΘΕΚΛΕΙΟ ΓΥΜΝΑΣΙΟ", labelUK: "Thekleio Gymnasium" },
   { value: "30", labelGR: "Λανίτειο Γυμνάσιο", labelUK: "Laniteio Gymnasium" },
   { value: "31", labelGR: "Λανίτειο Λύκειο", labelUK: "Laniteio Lyceum" },
