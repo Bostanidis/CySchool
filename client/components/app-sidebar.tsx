@@ -1,3 +1,5 @@
+"use client"
+
 import { 
   Home, 
   Search, 
@@ -22,6 +24,8 @@ import {
 } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import Image from "next/image"
 
 const navItems = [
   {
@@ -53,7 +57,7 @@ const navItems = [
   },
   {
     title: "Schools",
-    url: "#",
+    url: "schools",
     icon: GraduationCap,
   },
   {
@@ -69,17 +73,24 @@ const navItems = [
 ]
 
 export function AppSidebar() {
+
+
+  const [selected, setSelected] = useState("Home")
+
   return (
     <Sidebar className="bg-transparent border-0 h-screen flex flex-col">
-      <SidebarHeader className="p-6 flex-shrink-0">
-        <h1 className="text-2xl font-bold">CySchool</h1>
+      <SidebarHeader className="flex flex-row items-center justify-between p-6 flex-shrink-0">
+        <h1 className="text-2xl font-medium">CySchool</h1>
+        <Image width={54} height={54} alt="CySchool Logo" src="/CySchool.png"/>
       </SidebarHeader>
       
-      <SidebarContent className="flex-1 overflow-hidden my-6 mx-3">
+      <SidebarContent className="flex-1 overflow-hidden my-3 mx-3">
         <SidebarMenu className="flex h-[100%] justify-between">
           {navItems.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild className="h-12 text-base hover:bg-gray-100">
+              <SidebarMenuButton onClick={() => {
+                setSelected(item.title)
+              }} asChild className={"h-12 text-base hover:bg-gray-100 transition-all duration-200 " + (selected === (item.title) ? " bg-orange-300 hover:bg-orange-300" : "")}>
                 <a href={item.url} className="flex items-center gap-6 px-4">
                   <item.icon className="!h-6 !w-6 !font-normal"  />
                   <span className="text-base font-medium">{item.title}</span>
