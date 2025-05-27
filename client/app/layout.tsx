@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Geist, Inter } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
-const ubuntu = Poppins({
+const ubuntu = Geist({
   weight: ["300", "400", "500", "700"],
   variable: "--font-ubuntu",
   subsets: ["latin"],
