@@ -61,5 +61,36 @@ CREATE TABLE IF NOT EXISTS schools (
 -- (53, 'ΤΕΣΕΚ ΠΑΦΟΥ', 'TESEK Paphos', '{}'),
 -- (54, 'ΤΣΙΡΕΙΟ ΓΥΜΝΑΣΙΟ', 'Tsireio Gymnasium', '{}');
 
+-- DELETE FROM schools WHERE id=1; 
+-- DELETE FROM schools WHERE id=4; 
+-- DELETE FROM schools WHERE id=49; 
+-- DELETE FROM schools WHERE id=54; 
+-- DELETE FROM schools WHERE id=50; 
+-- DELETE FROM schools WHERE id=51; 
+
+-- DELETE FROM schools WHERE id=30;
+
+-- INSERT INTO schools (id, greek_name, english_name, students) VALUES 
+-- (1, 'ΝΙΚΟΛΑΪΔΕΙΟ ΓΥΜΝΑΣΙΟ', 'Nikolaideio Gymnasium', '{}'),
+-- (4, 'Περιφερειακό Γυμνάσιο και Λύκειο Λευκάρων', 'Regional Gymnasium and Lyceum of Lefkara', '{}'),
+-- (30, 'ΤΣΙΡΕΙΟ ΓΥΜΝΑΣΙΟ', 'Tsireio Gymnasium', '{}'),
+-- (54, 'ΣΧΟΛΗ ΟΜΟΔΟΥΣ', 'Omodos School', '{}'),
+-- (50, 'Α ΤΕΣΕΚ Λεμεσού', 'A TESEK Limassol', '{}'),
+-- (51, 'Γ΄ ΤΕΣΕΚ ΛΕΜΕΣΟΥ', 'C TESEK Limassol', '{}'),
+-- (49, 'Λανίτειο Λύκειο', 'Laniteio Lyceum', '{}');
+
+-- Create a new temporary table with the same structure
+-- CREATE TABLE schools_sorted (LIKE schools INCLUDING ALL);
+
+-- Insert data in the desired order
+-- INSERT INTO schools_sorted 
+-- SELECT * FROM schools ORDER BY id;
+
+-- Drop the original table
+-- DROP TABLE schools;
+
+-- Rename the new table
+-- ALTER TABLE schools_sorted RENAME TO schools;
+
 SELECT * FROM schools;
 

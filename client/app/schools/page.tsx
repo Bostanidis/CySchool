@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, GraduationCap, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface School {
   id: number;
@@ -11,11 +12,16 @@ interface School {
 }
 
 export default function SchoolsPage() {
+
+  // States
   const [schools, setSchools] = useState<School[]>([]);
   const [filteredSchools, setFilteredSchools] = useState<School[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Router
+  const router = useRouter();
 
   // Fetch schools from API
   useEffect(() => {
@@ -135,6 +141,9 @@ export default function SchoolsPage() {
 }
 
 function SchoolCard({ school }: { school: School }) {
+
+  const router = useRouter();
+
   // Determine school type based on name
   const getSchoolType = (name: string) => {
     if (name.toLowerCase().includes('γυμνάσιο') || name.toLowerCase().includes('gymnasium')) {
@@ -187,9 +196,11 @@ function SchoolCard({ school }: { school: School }) {
   const colors = getColorScheme(schoolType);
 
   return (
-    <div className={`${colors.bg} ${colors.border} flex justify-between flex-col border rounded-lg p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer group`}>
+    <button onClick={() => {
+      router.push(`/schools/${school.id}`)
+    }} className={`${colors.bg} ${colors.border} h-60 flex justify-between flex-col border rounded-lg p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer group`}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center justify-between mb-4">
         <div className={`p-2 rounded-lg ${colors.bg} ${colors.border} border group-hover:scale-110 transition-transform duration-200`}>
           <GraduationCap className={`h-6 w-6 ${colors.icon}`} />
         </div>
@@ -199,7 +210,7 @@ function SchoolCard({ school }: { school: School }) {
       </div>
 
       {/* School Names */}
-      <div className="mb-4">
+      <div className="mb-4 text-left">
         <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-1 group-hover:text-blue-600 transition-colors">
           {school.english_name}
         </h3>
@@ -218,6 +229,6 @@ function SchoolCard({ school }: { school: School }) {
           ID: {school.id}
         </div>
       </div>
-    </div>
+    </button>
   );
 }

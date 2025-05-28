@@ -86,7 +86,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarHeader className=" ">
         <div className="flex items-center p-2 gap-2 rounded-lg border-2 border-gray-100 bg-white">
-          <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
             <Image width={60} height={60} alt="CySchool Logo" src="/CySchool1.png" />
           </div>
           <div>
