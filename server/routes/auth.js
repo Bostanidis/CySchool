@@ -6,21 +6,44 @@ const router = express.Router();
 
 // Register Route
 router.post('/register', async (req, res) => {
+    const { username, fullname, email, password, grade, school, shownName } = req.body;
 
-    const { name, email, password, grade, school, shownName } = req.body;
+    try {
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Encryption
-    const hashedPassword = await bcrypt.hash(password, 12);
+        // Insert user
+        const userResult = await pool.query(
+        'INSERT INTO users (username, fullname, email, password, grade, school, shownName) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [username, fullname, email, hashedPassword, grade, school, shownName]
+        );
 
-    // Adding user
-    const user = await pool.query(
-        'INSERT INTO users (name, email, password, grade, school, shownName) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [name, email, hashedPassword, grade, school, shownName]
-    );
+        const user = userResult.rows[0];
 
-    res.json(user.rows[0]);
+        // Issue token
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
+        // Return token and user data
+        res.json({
+        token,
+        user: {
+            id: user.id,
+            username: user.username,       // if exists
+            email: user.email,
+            fullname: user.fullname,       // if exists
+            grade: user.grade,
+            friends: user.shownName,
+            avatar: user.grade,            // assuming grade used as avatar
+            school: user.school
+        }
+        });
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).json({ error: 'Internal server error during registration' });
+    }
 });
+
+
 
 // Login Route
 router.post('/login', async (req, res) => {
