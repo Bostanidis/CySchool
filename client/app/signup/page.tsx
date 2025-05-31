@@ -1,18 +1,24 @@
 "use client"
 
-
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
-import { handleSignup } from '@/utils/authFunctions';
+import { useRouter } from 'next/navigation';
 
 export default function SignUp() {
-
+    // Form states
+    const [username, setUsername] = useState<string>('');
+    const [fullname, setFullname] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [grade, setGrade] = useState<number | null>(null);
+    const [school, setSchool] = useState<number | null>(null);
+    const [shownName, setShownName] = useState<boolean>(true);
 
     interface School {
         id: number;
@@ -21,29 +27,42 @@ export default function SignUp() {
         students: string[];
     }
 
-    // States
-    const [schools, setSchools] = useState<School[]>([])
+    // Data states
+    const [schools, setSchools] = useState<School[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const router = useRouter();
 
+    // Fetch schools on mount
     useEffect(() => {
-
         const fetchSchools = async () => {
             setIsLoading(true);
             try {
-                const res = await axios.get("http://localhost:8000/api/schools")
-                setSchools(res.data)
+                const res = await axios.get("http://localhost:8000/api/schools");
+                setSchools(res.data);
             } catch (err) {
-                console.error("Error during school fetch", err)
+                console.error("Error during school fetch", err);
             } finally {
                 setIsLoading(false);
             }
         };
+        fetchSchools();
+    }, []);
 
-        fetchSchools()
-
-    }, [])
-
+    // Handle form submission
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        console.log("Submitting form with data:", {
+            username,
+            fullname,
+            email,
+            password,
+            grade,
+            school,
+            shownName
+        });
+        router.push("/")
+    };
 
     return (
         <div className="h-screen bg-green-100 flex items-center justify-center p-0 overflow-hidden">
@@ -66,29 +85,39 @@ export default function SignUp() {
                         </div>
 
                         {/* Form */}
-                        <form className="space-y-4">
+                        <form className="space-y-4" onSubmit={handleSubmit}>
                             <div className="space-y-2">
                                 <Label htmlFor="username">Username</Label>
                                 <Input
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    value={username}
                                     id="username"
                                     type="text"
                                     placeholder="Enter your username"
                                     className="focus-visible:ring-orange-500"
+                                    required
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="fullname">Full Name</Label>
                                 <Input
+                                    onChange={(e) => setFullname(e.target.value)}
+                                    value={fullname}
                                     id="fullname"
                                     type="text"
                                     placeholder="Enter your full name"
                                     className="focus-visible:ring-orange-500"
+                                    required
                                 />
                             </div>
 
                             <div className="flex items-center space-x-2">
-                                <Checkbox id="showFullName" />
+                                <Checkbox
+                                    id="showFullName"
+                                    checked={shownName}
+                                    onCheckedChange={(checked) => setShownName(Boolean(checked))}
+                                />
                                 <Label htmlFor="showFullName" className="text-sm font-normal">
                                     Show full name publicly
                                 </Label>
@@ -97,7 +126,10 @@ export default function SignUp() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-2">
                                     <Label htmlFor="grade">Grade</Label>
-                                    <Select>
+                                    <Select
+                                        value={grade ? grade.toString() : ""}
+                                        onValueChange={(value) => setGrade(parseInt(value))}
+                                    >
                                         <SelectTrigger className="w-full focus:ring-orange-500">
                                             <SelectValue placeholder="Select grade" />
                                         </SelectTrigger>
@@ -113,24 +145,25 @@ export default function SignUp() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="school">School</Label>
-                                    <Select>
+                                    <Select
+                                        value={school ? school.toString() : ""}
+                                        onValueChange={(value) => setSchool(parseInt(value))}
+                                    >
                                         <SelectTrigger className="w-full focus:ring-orange-500">
                                             <SelectValue placeholder="Select school" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {schools.map((school) => {
-                                                return (
-                                                    <SelectItem
-                                                        value={`${school.id}`}
-                                                        key={school.id}
-                                                        className="truncate"
-                                                    >
-                                                        <span className="truncate" title={school.greek_name}>
-                                                            {school.greek_name}
-                                                        </span>
-                                                    </SelectItem>
-                                                )
-                                            })}
+                                            {schools.map((sch) => (
+                                                <SelectItem
+                                                    value={`${sch.id}`}
+                                                    key={sch.id}
+                                                    className="truncate"
+                                                >
+                                                    <span className="truncate" title={sch.greek_name}>
+                                                        {sch.greek_name}
+                                                    </span>
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -139,24 +172,30 @@ export default function SignUp() {
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={email}
                                     id="email"
                                     type="email"
                                     placeholder="Enter your email"
                                     className="focus-visible:ring-orange-500"
+                                    required
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <Input
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    value={password}
                                     id="password"
                                     type="password"
                                     placeholder="Create a password"
                                     className="focus-visible:ring-orange-500"
+                                    required
                                 />
                             </div>
 
-                            <Button onClick={handleSignup} type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
+                            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
                                 Create account
                             </Button>
                         </form>

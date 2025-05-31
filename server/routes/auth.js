@@ -2,10 +2,12 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
+const authenticateToken = require('../middleware');
 const router = express.Router();
 
 // Register Route
 router.post('/register', async (req, res) => {
+
     const { username, fullname, email, password, grade, school, shownName } = req.body;
 
     try {
@@ -29,9 +31,9 @@ router.post('/register', async (req, res) => {
         user: {
             id: user.id,
             username: user.username,       // if exists
-            email: user.email,
-            fullname: user.fullname,       // if exists
+            email: user.email,    // if exists
             grade: user.grade,
+            fullname: user.fullname,   
             friends: user.shownName,
             avatar: user.grade,            // assuming grade used as avatar
             school: user.school
@@ -61,6 +63,32 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ token, user: { id: user.rows[0].id, username: user.rows[0].username, email: user.rows[0].email, fullname: user.rows[0].fullname, grade: user.rows[0].grade, friends: user.rows[0].shownName, avatar: user.rows[0].grade, school: user.rows[0].school } });
+});
+
+
+router.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const user = await pool.query('SELECT * FROM users WHERE id = $1', [req.userId]);
+
+    if (user.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+    const u = user.rows[0];
+    res.json({
+      user: {
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        fullname: u.fullname,
+        grade: u.grade,
+        friends: u.shownName,
+        avatar: u.grade, // same comment as before
+        school: u.school
+      }
     });
+  } catch (err) {
+    console.error('Me route error:', err);
+    res.status(500).json({ error: 'Failed to retrieve user' });
+  }
+});    
 
 module.exports = router;
