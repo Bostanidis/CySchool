@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Search, GraduationCap, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import api from '@/lib/axios';
 
 interface School {
   id: number;
@@ -27,15 +29,15 @@ export default function SchoolsPage() {
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/schools');
-        if (!response.ok) {
-          throw new Error('Failed to fetch schools');
-        }
-        const data = await response.json();
-        setSchools(data);
-        setFilteredSchools(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+
+        const token = localStorage.getItem("token");
+
+        const res = await api.get('http://localhost:8000/api/schools');
+
+        setSchools(res.data);
+        setFilteredSchools(res.data);
+      } catch (err: any) {
+        console.error('Error fetching messages:', err);
       } finally {
         setLoading(false);
       }

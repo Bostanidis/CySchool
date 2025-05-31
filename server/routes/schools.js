@@ -1,9 +1,10 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../db')
+const db = require('../db');
+const authenticateToken = require('../middleware');
 
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
     try {
         const result = await db.query(`SELECT * FROM schools`)
         res.json(result.rows)

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Send, Paperclip, Search, MoreHorizontal, File, Image, Video, Plus, Phone, VideoIcon } from "lucide-react";
+import { Send, Paperclip, Search, MoreHorizontal, File, Image, Video, Plus, Phone, VideoIcon, Router } from "lucide-react";
 import { io } from 'socket.io-client';
 import axios from "axios"
 
@@ -15,6 +15,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
 
 
 const socket = io('http://localhost:8000');
@@ -51,17 +53,24 @@ export default function Messages() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [people, setPeople] = useState<Conversation[]>([]);
 
+    const router = useRouter()
+
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const res = await axios.get<Message[]>('http://localhost:8000/api/messages');
-                setMessages(res.data);
+                const token = localStorage.getItem('token');
+
+                const res = await api.get('http://localhost:8000/api/messages');
+
+                setMessages(res.data); // only called if 200 OK
             } catch (err) {
-                console.error("error parsing messages", err)
+                console.error('Failed to fetch schools', err);
             }
         };
+
         fetchMessages();
     }, []);
+
 
 
 

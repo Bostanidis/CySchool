@@ -1,11 +1,50 @@
+"use client"
+
+
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { handleSignup } from '@/utils/authFunctions';
 
 export default function SignUp() {
+
+
+    interface School {
+        id: number;
+        greek_name: string;
+        english_name: string;
+        students: string[];
+    }
+
+    // States
+    const [schools, setSchools] = useState<School[]>([])
+    const [isLoading, setIsLoading] = useState(false);
+
+
+    useEffect(() => {
+
+        const fetchSchools = async () => {
+            setIsLoading(true);
+            try {
+                const res = await axios.get("http://localhost:8000/api/schools")
+                setSchools(res.data)
+            } catch (err) {
+                console.error("Error during school fetch", err)
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchSchools()
+
+    }, [])
+
+
     return (
         <div className="h-screen bg-green-100 flex items-center justify-center p-0 overflow-hidden">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full h-full max-w-none flex">
@@ -59,28 +98,39 @@ export default function SignUp() {
                                 <div className="space-y-2">
                                     <Label htmlFor="grade">Grade</Label>
                                     <Select>
-                                        <SelectTrigger className="focus:ring-orange-500">
+                                        <SelectTrigger className="w-full focus:ring-orange-500">
                                             <SelectValue placeholder="Select grade" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="7">Grade 7</SelectItem>
-                                            <SelectItem value="8">Grade 8</SelectItem>
-                                            <SelectItem value="9">Grade 9</SelectItem>
-                                            <SelectItem value="10">Grade 10</SelectItem>
-                                            <SelectItem value="11">Grade 11</SelectItem>
-                                            <SelectItem value="12">Grade 12</SelectItem>
+                                            <SelectItem value="7">A Gymnasium</SelectItem>
+                                            <SelectItem value="8">B Gymnasium</SelectItem>
+                                            <SelectItem value="9">C Gymnasium</SelectItem>
+                                            <SelectItem value="10">A Lyceum</SelectItem>
+                                            <SelectItem value="11">B Lyceum</SelectItem>
+                                            <SelectItem value="12">C Lyceum</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
-
                                 <div className="space-y-2">
                                     <Label htmlFor="school">School</Label>
                                     <Select>
-                                        <SelectTrigger className="focus:ring-orange-500">
+                                        <SelectTrigger className="w-full focus:ring-orange-500">
                                             <SelectValue placeholder="Select school" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {/* Add your school options here */}
+                                            {schools.map((school) => {
+                                                return (
+                                                    <SelectItem
+                                                        value={`${school.id}`}
+                                                        key={school.id}
+                                                        className="truncate"
+                                                    >
+                                                        <span className="truncate" title={school.greek_name}>
+                                                            {school.greek_name}
+                                                        </span>
+                                                    </SelectItem>
+                                                )
+                                            })}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -106,7 +156,7 @@ export default function SignUp() {
                                 />
                             </div>
 
-                            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
+                            <Button onClick={handleSignup} type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
                                 Create account
                             </Button>
                         </form>

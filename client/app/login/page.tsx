@@ -1,10 +1,19 @@
+"use client"
+
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { handleLogin } from '@/utils/authFunctions';
+import { useState } from 'react';
 
 export default function Login() {
+
+    // States
+    const [password, setPassword] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+
     return (
         <div className="h-screen bg-green-100 flex items-center justify-center p-0 overflow-hidden">
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full h-full max-w-none flex">
@@ -30,6 +39,10 @@ export default function Login() {
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
+                                    onChange={(e) => {
+                                        setEmail(e.target.value)
+                                        console.log(email)
+                                    }}
                                     id="email"
                                     type="email"
                                     placeholder="Enter your email"
@@ -40,6 +53,10 @@ export default function Login() {
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <Input
+                                    onChange={(e) => {
+                                        setPassword(e.target.value)
+                                        console.log(password)
+                                    }}
                                     id="password"
                                     type="password"
                                     placeholder="••••••••"
@@ -59,7 +76,7 @@ export default function Login() {
                                 </a>
                             </div>
 
-                            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
+                            <Button onClick={() => { handleLogin({ email, password }) }} type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
                                 Sign in
                             </Button>
                         </form>

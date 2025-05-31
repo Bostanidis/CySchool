@@ -19,10 +19,14 @@ app.use(express.json());
 app.use(cors());
 
 // Import routes
+const messagesRoutes = require("./routes/messages")
 const schoolsRouter = require("./routes/schools");
+const authRoutes = require('./routes/auth');
 
 // Routes
 app.use("/api/schools", schoolsRouter);
+app.use('/api/auth', authRoutes);
+app.use("/api/messages", messagesRoutes)
 
 // Socket.IO setup
 io.on('connection', (socket) => {
