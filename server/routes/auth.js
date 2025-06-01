@@ -27,17 +27,16 @@ router.post('/register', async (req, res) => {
 
         // Return token and user data
         res.json({
-        token,
-        user: {
+          token,
+          user: {
             id: user.id,
-            username: user.username,       // if exists
-            email: user.email,    // if exists
+            username: user.username,
+            email: user.email,
             grade: user.grade,
-            fullname: user.fullname,   
+            fullname: user.fullname,
             friends: user.shownName,
-            avatar: user.grade,            // assuming grade used as avatar
             school: user.school
-        }
+          }
         });
     } catch (err) {
         console.error('Registration error:', err);
@@ -68,11 +67,21 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const user = await pool.query('SELECT * FROM users WHERE id = $1', [req.userId]);
-
+    console.log('=== DEBUG /me route ===');
+    console.log('req.user:', req.user);
+    console.log('req.user.id:', req.user?.id);
+    console.log('typeof req.user.id:', typeof req.user?.id);
+    
+    const user = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    
+    console.log('Database query result:', user.rows);
+    console.log('Number of rows returned:', user.rows.length);
+    
     if (user.rows.length === 0) return res.status(404).json({ error: 'User not found' });
-
+    
     const u = user.rows[0];
+    console.log('User found:', u);
+    
     res.json({
       user: {
         id: u.id,
@@ -81,7 +90,7 @@ router.get('/me', authenticateToken, async (req, res) => {
         fullname: u.fullname,
         grade: u.grade,
         friends: u.shownName,
-        avatar: u.grade, // same comment as before
+        avatar: u.avatar,
         school: u.school
       }
     });
@@ -89,6 +98,6 @@ router.get('/me', authenticateToken, async (req, res) => {
     console.error('Me route error:', err);
     res.status(500).json({ error: 'Failed to retrieve user' });
   }
-});    
+});
 
 module.exports = router;

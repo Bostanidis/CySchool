@@ -5,14 +5,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { handleLogin } from '@/utils/authFunctions';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
 
     // States
     const [password, setPassword] = useState<string>("");
     const [email, setEmail] = useState<string>("");
+
+    // Data States
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const { login } = useAuth()
+
+    const router = useRouter();
+
+    const handleSubmit = async (e: any) => {
+        e.preventDefault();
+        setIsLoading(true)
+
+        try {
+            const credentials = {
+                email,
+                password
+            };
+
+            console.log('Submitting form with data:', credentials);
+
+            await login(credentials);
+            router.push('/');
+        } catch (err: any) {
+            console.error('Signup error:', err.message || err);
+            alert(err.message || 'Signup failed');
+        } finally {
+            setIsLoading(false)
+        }
+    };
 
     return (
         <div className="h-screen bg-green-100 flex items-center justify-center p-0 overflow-hidden">
@@ -76,7 +106,7 @@ export default function Login() {
                                 </a>
                             </div>
 
-                            <Button onClick={() => { handleLogin({ email, password }) }} type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
+                            <Button onClick={handleSubmit} type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
                                 Sign in
                             </Button>
                         </form>

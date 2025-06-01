@@ -27,10 +27,11 @@ import {
 } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useUser } from "@/contexts/userContext"
 
 const navItems = [
   {
@@ -78,6 +79,18 @@ const navItems = [
 ]
 
 export function AppSidebar() {
+
+
+
+  console.log('Component rendering'); // Add this
+
+  const { user } = useUser();
+
+  console.log('useAuth returned:', { user }); // Add this
+
+  useEffect(() => {
+    console.log('Component useEffect, user:', user);
+  }, [user]);
 
   const router = useRouter();
   const [selected, setSelected] = useState("Dashboard")
@@ -163,15 +176,15 @@ export function AppSidebar() {
             <span className="text-white text-sm font-medium">KD</span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">Kevin Dukkon</div>
-            <div className="text-xs text-gray-500 truncate">kevin@stripe.io</div>
+            <div className="text-sm font-medium text-gray-900 truncate">{user?.username}</div>
+            <div className="text-xs text-gray-500 truncate">{user?.email}</div>
           </div>
           <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
             <User className="w-4 h-4" />
           </Button>
         </div>
         <div className="mt-3 text-xs text-gray-400">
-          © 2023 Stripe, Inc. v11.0.1v
+          © 2025 CodeCulture, Corp. v2.0
         </div>
       </SidebarFooter>
     </Sidebar>

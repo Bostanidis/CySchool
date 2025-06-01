@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { UserProvider } from "@/contexts/userContext";
 
 const ubuntu = Geist({
   weight: ["300", "400", "500", "700"],
@@ -44,16 +45,20 @@ export default function RootLayout({
         {isAuthPage ? (
           // Render auth pages without sidebar
           <div className="h-screen overflow-hidden">
-            {children}
+            <UserProvider>
+              {children}
+            </UserProvider>
           </div>
         ) : (
           // Render normal pages with sidebar
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="flex-1">
-              {children}
-            </main>
-          </SidebarProvider>
+          <UserProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="flex-1">
+                {children}
+              </main>
+            </SidebarProvider>
+          </UserProvider>
         )}
       </body>
     </html>

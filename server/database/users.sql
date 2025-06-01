@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     school INTEGER
 );
 
-ALTER TABLE  users ADD shownName BOOLEAN DEFAULT true;
+-- ALTER TABLE users ADD COLUMN password TEXT NOT NULL;
 
 SELECT * FROM users
 

@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { Loader } from 'lucide-react';
 
 export default function SignUp() {
     // Form states
@@ -19,6 +21,7 @@ export default function SignUp() {
     const [grade, setGrade] = useState<number | null>(null);
     const [school, setSchool] = useState<number | null>(null);
     const [shownName, setShownName] = useState<boolean>(true);
+    const { signup } = useAuth();
 
     interface School {
         id: number;
@@ -52,16 +55,29 @@ export default function SignUp() {
     // Handle form submission
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        console.log("Submitting form with data:", {
-            username,
-            fullname,
-            email,
-            password,
-            grade,
-            school,
-            shownName
-        });
-        router.push("/")
+        setIsLoading(true)
+
+        try {
+            const credentials = {
+                username,
+                fullname,
+                email,
+                password,
+                grade,
+                school,
+                shownName,
+            };
+
+            console.log('Submitting form with data:', credentials);
+
+            await signup(credentials);
+            router.push('/');
+        } catch (err: any) {
+            console.error('Signup error:', err.message || err);
+            alert(err.message || 'Signup failed');
+        } finally {
+            setIsLoading(false)
+        }
     };
 
     return (
@@ -196,7 +212,7 @@ export default function SignUp() {
                             </div>
 
                             <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-                                Create account
+                                {isLoading ? (<Loader className='animate-spin' />) : (<p>Create Account</p>)}
                             </Button>
                         </form>
 
