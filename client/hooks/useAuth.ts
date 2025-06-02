@@ -34,18 +34,19 @@ export function useAuth() {
     const res = await fetch('http://localhost:8000/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData)
+      body: JSON.stringify(userData),
     });
 
     if (!res.ok) {
       const error = await res.json();
-      throw new Error(error.error || 'Signup failed');
+      throw new Error(error.errorMessage || error.error || 'Signup failed');
     }
 
     const { token, user } = await res.json();
     localStorage.setItem('token', token);
     setUser(user);
   };
+
 
   const logout = () => {
     localStorage.removeItem('token');

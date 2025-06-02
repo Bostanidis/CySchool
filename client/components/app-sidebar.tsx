@@ -52,7 +52,7 @@ const navItems = [
   },
   {
     title: "Classmates",
-    url: "#",
+    url: "/classmates",
     icon: Users,
   },
   {

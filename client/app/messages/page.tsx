@@ -55,7 +55,10 @@ export default function Messages() {
 
     const router = useRouter()
 
+
+    // Fetch Messages
     useEffect(() => {
+
         const fetchMessages = async () => {
             try {
                 const token = localStorage.getItem('token');
@@ -72,7 +75,17 @@ export default function Messages() {
     }, []);
 
 
+    // Fetch Friends
+    useEffect(() => {
+        const fetchFriends = async () => {
+            try {
 
+            } catch {
+
+            }
+        }
+
+    }, [])
 
     useEffect(() => {
         const handleReceiveMessage = (message: Message) => {
@@ -82,7 +95,7 @@ export default function Messages() {
         socket.on('receive-message', handleReceiveMessage);
 
         return () => {
-            socket.off('receive-message', handleReceiveMessage); // 🔒 Clean up listener
+            socket.off('receive-message', handleReceiveMessage);
         };
     }, []);
 
@@ -111,33 +124,6 @@ export default function Messages() {
         { id: 4, name: "User 4", avatar: "/api/placeholder/32/32" },
         { id: 5, name: "User 5", avatar: "/api/placeholder/32/32" }
     ];
-
-    // const people = [
-    //     {
-    //         id: 1,
-    //         name: "Brand Practice - Kristin Watson",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatar: "/api/placeholder/32/32"
-    //     },
-    //     {
-    //         id: 2,
-    //         name: "Brand Practice - Bessie Cooper",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatar: "/api/placeholder/32/32"
-    //     },
-    //     {
-    //         id: 3,
-    //         name: "Brand Practice - Robert Foxn",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatar: "/api/placeholder/32/32"
-    //     },
-    //     {
-    //         id: 4,
-    //         name: "Brand Practice - Marvin McKinney",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatar: "/api/placeholder/32/32"
-    //     }
-    // ];
 
     const groups = [
         {

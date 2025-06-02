@@ -18,7 +18,7 @@ export default function SignUp() {
     const [fullname, setFullname] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [grade, setGrade] = useState<number | null>(null);
+    const [grade, setGrade] = useState<any>(null);
     const [school, setSchool] = useState<number | null>(null);
     const [shownName, setShownName] = useState<boolean>(true);
     const { signup } = useAuth();
@@ -33,7 +33,8 @@ export default function SignUp() {
     // Data states
     const [schools, setSchools] = useState<School[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [erroredInput, setErroredInput] = useState<any>(null);
+    const [formError, setFormError] = useState<string | null>(null);
     const router = useRouter();
 
     // Fetch schools on mount
@@ -41,7 +42,7 @@ export default function SignUp() {
         const fetchSchools = async () => {
             setIsLoading(true);
             try {
-                const res = await axios.get("http://localhost:8000/api/schools");
+                const res = await axios.get("http://localhost:8000/api/schools/schools");
                 setSchools(res.data);
             } catch (err) {
                 console.error("Error during school fetch", err);
@@ -55,7 +56,20 @@ export default function SignUp() {
     // Handle form submission
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        if (isLoading) {
+            return
+        }
+
         setIsLoading(true)
+
+        const classRegex = /^[ABC][0-9]{2}$/;
+
+        if (!classRegex.test(grade)) {
+            setErroredInput(grade);
+            setIsLoading(false);
+            console.log("incorrect format for", grade);
+            return;
+        }
 
         try {
             const credentials = {
@@ -74,7 +88,7 @@ export default function SignUp() {
             router.push('/');
         } catch (err: any) {
             console.error('Signup error:', err.message || err);
-            alert(err.message || 'Signup failed');
+            setFormError(err.message || 'Signup failed');
         } finally {
             setIsLoading(false)
         }
@@ -141,23 +155,18 @@ export default function SignUp() {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-2">
-                                    <Label htmlFor="grade">Grade</Label>
-                                    <Select
-                                        value={grade ? grade.toString() : ""}
-                                        onValueChange={(value) => setGrade(parseInt(value))}
-                                    >
-                                        <SelectTrigger className="w-full focus:ring-orange-500">
-                                            <SelectValue placeholder="Select grade" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="7">A Gymnasium</SelectItem>
-                                            <SelectItem value="8">B Gymnasium</SelectItem>
-                                            <SelectItem value="9">C Gymnasium</SelectItem>
-                                            <SelectItem value="10">A Lyceum</SelectItem>
-                                            <SelectItem value="11">B Lyceum</SelectItem>
-                                            <SelectItem value="12">C Lyceum</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Label htmlFor="grade">Class</Label>
+                                    <Input
+                                        onChange={(e) => setGrade(e.target.value)}
+                                        id="grade"
+                                        type="text"
+                                        placeholder="Class (B51, A23, C12)"
+                                        className={`focus-visible:ring-orange-500 ${erroredInput === grade && erroredInput !== null ? "ring ring-red-500" : ""}`}
+                                        required
+                                    />
+                                    {erroredInput === grade && erroredInput !== null && (
+                                        <p className="text-sm text-red-500">Incorrect format. Must be A/B/C followed by two digits.</p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="school">School</Label>
@@ -210,6 +219,12 @@ export default function SignUp() {
                                     required
                                 />
                             </div>
+
+                            {formError && (
+                                <div className="text-red-600 mb-4" role="alert">
+                                    {formError}
+                                </div>
+                            )}
 
                             <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
                                 {isLoading ? (<Loader className='animate-spin' />) : (<p>Create Account</p>)}

@@ -4,8 +4,13 @@ const db = require('../db');
 const authenticateToken = require('../middleware');
 
 router.get('/', authenticateToken ,async (req, res) => {
+
+  const { selectedConversationId } = req.body
+
   try {
-    const result = await db.query('SELECT * FROM messages');
+    const result = await db.query(`
+      SELECT * FROM messages WHERE ${selectedConversationId}=conversation_id;
+    `);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Database error' });

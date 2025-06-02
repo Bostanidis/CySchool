@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS users (
     school INTEGER
 );
 
--- ALTER TABLE users ADD COLUMN password TEXT NOT NULL;
+-- ALTER TABLE users ADD COLUMN grade TEXT;
+
+-- TRUNCATE users;
 
 SELECT * FROM users
 

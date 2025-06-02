@@ -10,6 +10,36 @@ router.post('/register', async (req, res) => {
 
     const { username, fullname, email, password, grade, school, shownName } = req.body;
 
+    async function emailExists(email) {
+      const query = `
+        SELECT 1 FROM users 
+        WHERE email = $1
+        LIMIT 1
+      `
+      const result = await pool.query(query, [email])
+      return result.rowCount > 0
+    }
+
+    async function usernameExists(username) {
+      const query = `
+        SELECT 1 FROM users 
+        WHERE username = $1
+        LIMIT 1
+      `
+      const result = await pool.query(query, [username])
+      return result.rowCount > 0
+    }
+
+    if (await emailExists(email)) {
+      res.status(409).json({ errorMessage: "Email already exists"});
+      return
+    }
+
+    if (await usernameExists(username)) {
+      res.status(409).json({ errorMessage: "Username already exists"});
+      return
+    }
+
     try {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 12);
