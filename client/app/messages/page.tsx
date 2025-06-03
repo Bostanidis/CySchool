@@ -52,9 +52,9 @@ export default function Messages() {
     const [selectedChat, setSelectedChat] = useState<any>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [people, setPeople] = useState<Conversation[]>([]);
+    const [groups, setGroups] = useState();
 
     const router = useRouter()
-
 
     // Fetch Messages
     useEffect(() => {
@@ -72,6 +72,14 @@ export default function Messages() {
         };
 
         fetchMessages();
+
+        const fetchConversations = async () => {
+            try {
+
+            } catch (err) {
+                console.error("Error while fetching conversations", err)
+            }
+        }
     }, []);
 
 
@@ -196,11 +204,10 @@ export default function Messages() {
                                     <h2 className="text-lg font-semibold text-gray-900">People</h2>
                                     <Select>
                                         <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Select a fruit" />
+                                            <SelectValue placeholder="Select a friend" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                <SelectLabel>Fruits</SelectLabel>
                                                 { }
                                             </SelectGroup>
                                         </SelectContent>

@@ -7,10 +7,11 @@ CREATE TABLE IF NOT EXISTS users (
     grade INTEGER NOT NULL,
     friends UUID[] DEFAULT '{}',
     avatar TEXT DEFAULT '',
-    school INTEGER
+    school INTEGER,
+    isOnline BOOLEAN DEFAULT false
 );
 
--- ALTER TABLE users ADD COLUMN grade TEXT;
+-- ALTER TABLE users ADD COLUMN isOnline BOOLEAN DEFAULT false;
 
 -- TRUNCATE users;
 

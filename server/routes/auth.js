@@ -65,7 +65,8 @@ router.post('/register', async (req, res) => {
             grade: user.grade,
             fullname: user.fullname,
             friends: user.shownName,
-            school: user.school
+            school: user.school,
+            isOnline: user.isOnline
           }
         });
     } catch (err) {
@@ -91,7 +92,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, user: { id: user.rows[0].id, username: user.rows[0].username, email: user.rows[0].email, fullname: user.rows[0].fullname, grade: user.rows[0].grade, friends: user.rows[0].shownName, avatar: user.rows[0].grade, school: user.rows[0].school } });
+    res.json({ token, user: { id: user.rows[0].id, username: user.rows[0].username, email: user.rows[0].email, fullname: user.rows[0].fullname, grade: user.rows[0].grade, friends: user.rows[0].shownName, avatar: user.rows[0].grade, school: user.rows[0].school, isOnline: user.rows[0].isOnline } });
 });
 
 
@@ -121,7 +122,8 @@ router.get('/me', authenticateToken, async (req, res) => {
         grade: u.grade,
         friends: u.shownName,
         avatar: u.avatar,
-        school: u.school
+        school: u.school,
+        isOnline: u.isOnline
       }
     });
   } catch (err) {

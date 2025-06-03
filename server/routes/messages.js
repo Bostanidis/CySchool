@@ -30,17 +30,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-// router.post('/', async (req, res) => {
-//   const { name, address } = req.body;
-//   try {
-//     const result = await db.query(
-//       'INSERT INTO schools (name, address) VALUES ($1, $2) RETURNING *',
-//       [name, address]
-//     );
-//     res.status(201).json(result.rows[0]);
-//   } catch (err) {
-//     res.status(500).json({ error: 'Database error' });
-//   }
-// });
-
 module.exports = router;

@@ -22,11 +22,13 @@ app.use(cors());
 const messagesRoutes = require("./routes/messages")
 const schoolsRouter = require("./routes/schools");
 const authRoutes = require('./routes/auth');
+const classmateRoutes = require('./routes/classmates');
 
 // Routes
 app.use("/api/schools", schoolsRouter);
 app.use('/api/auth', authRoutes);
-app.use("/api/messages", messagesRoutes)
+app.use("/api/messages", messagesRoutes);
+app.use("/api/classmates", classmateRoutes);
 
 // Socket.IO setup
 io.on('connection', (socket) => {
