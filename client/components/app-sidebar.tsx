@@ -80,17 +80,7 @@ const navItems = [
 
 export function AppSidebar() {
 
-
-
-  console.log('Component rendering'); // Add this
-
   const { user } = useUser();
-
-  console.log('useAuth returned:', { user }); // Add this
-
-  useEffect(() => {
-    console.log('Component useEffect, user:', user);
-  }, [user]);
 
   const router = useRouter();
   const [selected, setSelected] = useState("Dashboard")

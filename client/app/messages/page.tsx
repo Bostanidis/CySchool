@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Send, Paperclip, Search, MoreHorizontal, File, Image, Video, Plus, Phone, VideoIcon, Router } from "lucide-react";
+import { Send, Paperclip, Search, MoreHorizontal, Image as ImageIcon, File, Video, Plus, Phone, VideoIcon, Router, GroupIcon } from "lucide-react";
 import { io } from 'socket.io-client';
 import axios from "axios"
 
@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/select"
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
+import Image from "next/image";
+import { useUser } from "@/contexts/userContext";
+import { formatTimeAgo } from "@/utils/formatTimeAgo";
 
 
 const socket = io('http://localhost:8000');
@@ -26,9 +29,9 @@ export default function Messages() {
     // Interfaces
     type Message = {
         id: string;
-        sender: string;
-        time: string;
-        text?: string;
+        sender_id: string;
+        created_at: string;
+        content?: any;
         avatar?: string;
         isOwn?: boolean;
         hasAudio?: boolean;
@@ -42,6 +45,8 @@ export default function Messages() {
         is_direct: boolean;
         participants: string[];
         created_at?: string;
+        avatar?: string;
+        name?: string;
     }
 
 
@@ -52,20 +57,56 @@ export default function Messages() {
     const [selectedChat, setSelectedChat] = useState<any>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [people, setPeople] = useState<Conversation[]>([]);
-    const [groups, setGroups] = useState();
+    const [groups, setGroups] = useState<Conversation[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+
+    const { user } = useUser();
 
     const router = useRouter()
 
-    // Fetch Messages
+    // Fetching Logic
+    useEffect(() => {
+
+        if (!user) return;
+        // Conversations, People, Chats, Groups
+        const fetchConversations = async () => {
+            try {
+                const res = await api.get<Conversation[]>(`/conversations?user_id=${user?.id}`);
+                setConversations(res.data);
+
+                console.log(res.data)
+
+                const people: Conversation[] = [];
+                const groups: Conversation[] = [];
+
+                for (const convo of res.data) {
+                    if (convo.is_direct) {
+                        people.push(convo);
+                    } else {
+                        groups.push(convo);
+                    }
+                }
+
+                setPeople(people);
+                setGroups(groups);
+            } catch (err) {
+                console.error("error getting conversation", err)
+            }
+        }
+
+        fetchConversations()
+
+    }, [user]);
+
     useEffect(() => {
 
         const fetchMessages = async () => {
+            if (!selectedChat) return;
+
             try {
-                const token = localStorage.getItem('token');
+                const res = await api.get(`/messages?selectedConversationId=${selectedChat.id}`);
 
-                const res = await api.get('http://localhost:8000/api/messages');
-
-                setMessages(res.data); // only called if 200 OK
+                setMessages(res.data);
             } catch (err) {
                 console.error('Failed to fetch schools', err);
             }
@@ -73,28 +114,11 @@ export default function Messages() {
 
         fetchMessages();
 
-        const fetchConversations = async () => {
-            try {
-
-            } catch (err) {
-                console.error("Error while fetching conversations", err)
-            }
-        }
-    }, []);
+    }, [selectedChat])
 
 
-    // Fetch Friends
-    useEffect(() => {
-        const fetchFriends = async () => {
-            try {
 
-            } catch {
-
-            }
-        }
-
-    }, [])
-
+    // Sockets and messaging logic
     useEffect(() => {
         const handleReceiveMessage = (message: Message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
@@ -107,22 +131,28 @@ export default function Messages() {
         };
     }, []);
 
-    const sendMessage = () => {
-        socket.emit('send-message', input);
-        setInput('');
-    }
 
-    useEffect(() => {
-        const getConversations = async () => {
-            try {
-                const res = await axios.get<Conversation[]>('http://localhost:8000/api/conversations');
-                setPeople(res.data);
-            } catch (err) {
-                console.error("error getting conversation", err)
-            }
+    // Socket Messaging
+    const sendMessage = async () => {
+        if (!input.trim()) return;
+
+        const messageData = {
+            conversation_id: selectedChat.id,
+            sender_id: user?.id,
+            content: input.trim()
+        };
+
+        try {
+            const res = await api.post('/messages', messageData);
+            const savedMessage = res.data;
+
+            socket.emit('send-message', savedMessage);
+            setInput('');
+        } catch (err) {
+            console.error('Failed to send message:', err);
         }
-        getConversations()
-    }, [])
+    };
+
 
 
     const timelineUsers = [
@@ -133,26 +163,26 @@ export default function Messages() {
         { id: 5, name: "User 5", avatar: "/api/placeholder/32/32" }
     ];
 
-    const groups = [
-        {
-            id: 1,
-            name: "GPT-5, Research Book 0.5",
-            time: "11:30 AM - 12:00 PM",
-            avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
-        },
-        {
-            id: 2,
-            name: "Deepfake AI",
-            time: "11:30 AM - 12:00 PM",
-            avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
-        },
-        {
-            id: 3,
-            name: "Future of ai revolution",
-            time: "11:30 AM - 12:00 PM",
-            avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
-        }
-    ];
+    // const groups = [
+    //     {
+    //         id: 1,
+    //         name: "GPT-5, Research Book 0.5",
+    //         time: "11:30 AM - 12:00 PM",
+    //         avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
+    //     },
+    //     {
+    //         id: 2,
+    //         name: "Deepfake AI",
+    //         time: "11:30 AM - 12:00 PM",
+    //         avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
+    //     },
+    //     {
+    //         id: 3,
+    //         name: "Future of ai revolution",
+    //         time: "11:30 AM - 12:00 PM",
+    //         avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
+    //     }
+    // ];
 
     const handleChatSelect = (chat: any) => {
         setSelectedChat(chat);
@@ -166,7 +196,7 @@ export default function Messages() {
 
     const fileStats = [
         { type: "Documents", count: 231, color: "bg-teal-500", icon: File },
-        { type: "Photos", count: 45, color: "bg-orange-400", icon: Image },
+        { type: "Photos", count: 45, color: "bg-orange-400", icon: ImageIcon },
         { type: "Movies", count: "", color: "bg-blue-500", icon: Video },
         { type: "Others", count: "19 files, 2GB MB", color: "bg-red-400", icon: Plus }
     ];
@@ -240,13 +270,13 @@ export default function Messages() {
                                             onClick={() => handleChatSelect(group)}
                                         >
                                             <div className="flex -space-x-2">
-                                                {group.avatars.map((avatar, index) => (
-                                                    <div key={index} className="w-8 h-8 bg-gray-300 rounded-full border-2 border-white"></div>
-                                                ))}
+                                                {group.avatar ? <Image src={group.avatar} alt="Group avatar" /> : <GroupIcon />}
                                             </div>
                                             <div className="flex-1 min-w-0 ml-2">
-                                                <p className="text-sm font-medium text-gray-900 truncate">{group.name}</p>
-                                                <p className="text-xs text-gray-500">{group.time}</p>
+                                                <p className="text-sm font-medium text-gray-900 truncate">
+                                                    {group.name ? `${group.name}` : `Group`}
+                                                </p>
+                                                {/* <p className="text-xs text-gray-500">{group.time}</p> */}
                                             </div>
                                             <button className="text-gray-400 hover:text-gray-600">
                                                 <MoreHorizontal className="w-4 h-4" />
@@ -275,7 +305,7 @@ export default function Messages() {
                                     <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
                                     <div>
                                         <h1 className="text-lg font-semibold text-gray-900">
-                                            {selectedChat?.name || "Kristin Watson"}
+                                            {selectedChat?.name || "Chat"}
                                         </h1>
                                         <p className="text-xs text-gray-500">Last seen 5 min</p>
                                     </div>
@@ -296,13 +326,13 @@ export default function Messages() {
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {messages.map((msg) => (
                                 <div key={msg.id}>
-                                    <div className={`flex items-start space-x-3 ${msg.isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                                    <div className={`flex items-start space-x-3 ${msg.sender_id === user?.id ? 'flex-row-reverse space-x-reverse' : ''}`}>
                                         <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
-                                        <div className={`flex flex-col ${msg.isOwn ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
-                                            {msg.time && (
-                                                <span className="text-xs text-gray-500 mb-1">{msg.time}</span>
+                                        <div className={`flex flex-col ${msg.sender_id === user?.id ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
+                                            {msg.created_at && (
+                                                <span className="text-xs text-gray-500 mb-1">{formatTimeAgo(msg.created_at)}</span>
                                             )}
-                                            <div className={`px-4 py-2 rounded-lg ${msg.isOwn
+                                            <div className={`px-4 py-2 rounded-lg ${msg.sender_id === user?.id
                                                 ? 'bg-teal-500 text-white'
                                                 : 'bg-white text-gray-900 border border-gray-200'
                                                 }`}>
@@ -321,7 +351,7 @@ export default function Messages() {
                                                     </div>
                                                 ) : msg.hasFile ? (
                                                     <div>
-                                                        <p className="text-sm mb-2">{msg.text}</p>
+                                                        <p className="text-sm mb-2">{msg.content}</p>
                                                         <div className="bg-purple-100 rounded-lg p-3 flex items-center space-x-3">
                                                             <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
                                                                 <File className="w-4 h-4 text-white" />
@@ -333,7 +363,7 @@ export default function Messages() {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <p className="text-sm">{msg.text}</p>
+                                                    <p className="text-sm">{msg.content}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -362,7 +392,7 @@ export default function Messages() {
                                     <Paperclip className="w-5 h-5" />
                                 </button>
                                 <button className="p-2 text-gray-400 hover:text-gray-600">
-                                    <Image className="w-5 h-5" />
+                                    <ImageIcon className="w-5 h-5" />
                                 </button>
                                 <div className="flex-1 relative">
                                     <input
@@ -392,7 +422,7 @@ export default function Messages() {
                     <div className="p-6 border-b border-gray-200">
                         <div className="text-center">
                             <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3"></div>
-                            <h3 className="font-semibold text-gray-900">{selectedChat?.name || "Kristin Watson"}</h3>
+                            <h3 className="font-semibold text-gray-900">{selectedChat?.name || "Chat"}</h3>
                             <p className="text-sm text-gray-500">@watson.kristin</p>
                         </div>
                     </div>

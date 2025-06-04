@@ -34,26 +34,21 @@ type UserProviderProps = {
 };
 
 export const UserProvider = ({ children }: UserProviderProps) => {
-  console.log('🔄 UserProvider: Component rendering'); // Add this
 
   const [user, setUser] = useState<User>(null);
 
-  console.log('🔄 UserProvider: Current user state:', user); // Add this
 
   useEffect(() => {
-    console.log('🔄 UserProvider: useEffect triggered'); // Add this
 
     const token = localStorage.getItem('token');
-    console.log('🔄 UserProvider: Token from localStorage:', token); // Add this
 
     if (!token) {
-      console.log('🔄 UserProvider: No token found, returning'); // Add this
       return;
     }
 
     const fetchUser = async () => {
       try {
-        console.log('🔄 UserProvider: Making API request to /me'); // Add this
+
 
         const res = await axios.get('http://localhost:8000/api/auth/me', {
           headers: {
@@ -61,7 +56,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
           },
         });
 
-        console.log('✅ UserProvider: API response:', res.data); // Add this
         setUser(res.data.user);
 
       } catch (err) {
@@ -74,7 +68,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     fetchUser();
   }, []);
 
-  console.log('🔄 UserProvider: About to render children'); // Add this
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

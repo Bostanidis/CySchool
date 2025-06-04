@@ -3,11 +3,8 @@ import { useContext } from 'react';
 import { UserContext } from '../contexts/userContext'; // path to your context
 
 export function useAuth() {
-  console.log('🔄 useAuth: Hook called'); // Add this
 
   const context = useContext(UserContext);
-
-  console.log('🔄 useAuth: Context value:', context); // Add this
 
   if (!context) throw new Error("useAuth must be used within a UserProvider");
 
