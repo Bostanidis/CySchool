@@ -8,6 +8,7 @@ import React, {
   ReactNode,
 } from 'react';
 import axios from 'axios';
+import { UserRound } from 'lucide-react';
 
 type User = {
   id: string;
@@ -55,6 +56,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (!res.data.user.avatar) {
+          res.data.user.avatar = <UserRound />
+        }
 
         setUser(res.data.user);
 

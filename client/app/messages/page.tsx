@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Send, Paperclip, Search, MoreHorizontal, Image as ImageIcon, File, Video, Plus, Phone, VideoIcon, Router, GroupIcon } from "lucide-react";
+import { Send, Paperclip, Search, MoreHorizontal, Image as ImageIcon, File, Video, Plus, Phone, VideoIcon, Router, GroupIcon, UserRound, UserRoundIcon, CircleUserRound, Users } from "lucide-react";
 import { io } from 'socket.io-client';
 import axios from "axios"
 
@@ -59,6 +59,7 @@ export default function Messages() {
     const [people, setPeople] = useState<Conversation[]>([]);
     const [groups, setGroups] = useState<Conversation[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [selectedChatParticipants, setSelectedChatParticipants] = useState<any>([]);
 
     const { user } = useUser();
 
@@ -117,6 +118,12 @@ export default function Messages() {
     }, [selectedChat])
 
 
+    // Participants Fetching
+    useEffect(() => {
+
+
+    }, [selectedChat])
+
 
     // Sockets and messaging logic
     useEffect(() => {
@@ -163,29 +170,27 @@ export default function Messages() {
         { id: 5, name: "User 5", avatar: "/api/placeholder/32/32" }
     ];
 
-    // const groups = [
-    //     {
-    //         id: 1,
-    //         name: "GPT-5, Research Book 0.5",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
-    //     },
-    //     {
-    //         id: 2,
-    //         name: "Deepfake AI",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
-    //     },
-    //     {
-    //         id: 3,
-    //         name: "Future of ai revolution",
-    //         time: "11:30 AM - 12:00 PM",
-    //         avatars: ["/api/placeholder/32/32", "/api/placeholder/32/32"]
-    //     }
-    // ];
-
     const handleChatSelect = (chat: any) => {
         setSelectedChat(chat);
+
+        const fetchParticipants = async () => {
+
+            const otherParticipants = chat.participants.filter((id: string) => id !== user?.id);
+            try {
+                const res = await api.get('/users', {
+                    params: {
+                        participants: otherParticipants, // Axios automatically serializes arrays like ?participants=uuid1&participants=uuid2
+                    }
+                });
+                setSelectedChatParticipants(res.data);
+            } catch (err) {
+                console.error("Error while fetching the participants", err)
+            }
+
+        }
+
+        fetchParticipants()
+
         setCurrentView("chat");
     };
 
@@ -193,6 +198,12 @@ export default function Messages() {
         setCurrentView("list");
         setSelectedChat(null);
     };
+
+    const handleKeyDown = (event: any) => {
+        if (event.key === "Enter") {
+            sendMessage()
+        }
+    }
 
     const fileStats = [
         { type: "Documents", count: 231, color: "bg-teal-500", icon: File },
@@ -270,7 +281,7 @@ export default function Messages() {
                                             onClick={() => handleChatSelect(group)}
                                         >
                                             <div className="flex -space-x-2">
-                                                {group.avatar ? <Image src={group.avatar} alt="Group avatar" /> : <GroupIcon />}
+                                                {group.avatar ? <Image src={group.avatar} alt="Group avatar" /> : <Users />}
                                             </div>
                                             <div className="flex-1 min-w-0 ml-2">
                                                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -302,7 +313,9 @@ export default function Messages() {
                                     </svg>
                                 </button>
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                                    {selectedChatParticipants[0]?.avatar ? (
+                                        <Image width={64} height={64} alt="user profile picture" src={selectedChatParticipants[0]?.avatar} />
+                                    ) : (<UserRound width={32} height={32} />)}
                                     <div>
                                         <h1 className="text-lg font-semibold text-gray-900">
                                             {selectedChat?.name || "Chat"}
@@ -326,8 +339,10 @@ export default function Messages() {
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {messages.map((msg) => (
                                 <div key={msg.id}>
-                                    <div className={`flex items-start space-x-3 ${msg.sender_id === user?.id ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                                        <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                                    <div className={`flex items-end space-x-3 ${msg.sender_id === user?.id ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                                        {selectedChatParticipants[0]?.avatar ? (
+                                            <Image width={64} height={64} alt="user profile picture" src={selectedChatParticipants[0]?.avatar} />
+                                        ) : (<CircleUserRound width={32} height={32} className="flex-shrink-0" />)}
                                         <div className={`flex flex-col ${msg.sender_id === user?.id ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
                                             {msg.created_at && (
                                                 <span className="text-xs text-gray-500 mb-1">{formatTimeAgo(msg.created_at)}</span>
@@ -399,6 +414,7 @@ export default function Messages() {
                                         type="text"
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
                                         placeholder=""
                                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                                     />
@@ -423,7 +439,6 @@ export default function Messages() {
                         <div className="text-center">
                             <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-3"></div>
                             <h3 className="font-semibold text-gray-900">{selectedChat?.name || "Chat"}</h3>
-                            <p className="text-sm text-gray-500">@watson.kristin</p>
                         </div>
                     </div>
 

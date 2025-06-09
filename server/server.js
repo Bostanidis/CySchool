@@ -23,14 +23,16 @@ const messagesRoutes = require("./routes/messages")
 const schoolsRouter = require("./routes/schools");
 const authRoutes = require('./routes/auth');
 const classmateRoutes = require('./routes/classmates');
-const conversationRoutes = require("./routes/conversations")
+const conversationRoutes = require("./routes/conversations");
+const usersRoutes = require("./routes/users");
 
 // Routes
 app.use("/api/schools", schoolsRouter);
 app.use('/api/auth', authRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/classmates", classmateRoutes);
-app.use("/api/conversations", conversationRoutes)
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/users", usersRoutes);
 
 // Socket.IO setup
 io.on('connection', (socket) => {
