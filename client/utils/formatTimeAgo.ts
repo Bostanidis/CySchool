@@ -1,31 +1,39 @@
-export function formatTimeAgo(timestamp: string | number | Date): string {
-    const now = new Date();
-    const date = new Date(timestamp);
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+export function formatTimeAgo(
+  timestamp: string | number | Date
+): string {
+  // 1. Parse into a JS Date
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) {
+    // invalid input — treat as "just now"
+    return "just now";
+  }
 
-    if (isNaN(seconds) || seconds < 0) return "just now";
+  // 2. Compute difference in seconds
+  const now = Date.now();
+  const diffInSeconds = Math.floor((now - date.getTime()) / 1000);
+  if (diffInSeconds < 1) {
+    return "just now";
+  }
 
-    const intervals: [number, string][] = [
-        [60, "second"],
-        [60 * 60, "minute"],
-        [60 * 60 * 24, "hour"],
-        [60 * 60 * 24 * 7, "day"],
-        [60 * 60 * 24 * 30, "week"],
-        [60 * 60 * 24 * 365, "month"],
-        [Infinity, "year"]
-    ];
+  // 3. Define thresholds (seconds per unit)
+  const intervals: { seconds: number; unit: string }[] = [
+    { seconds: 31536000, unit: "year"   },
+    { seconds: 2592000,  unit: "month"  },
+    { seconds: 604800,   unit: "week"   },
+    { seconds: 86400,    unit: "day"    },
+    { seconds: 3600,     unit: "hour"   },
+    { seconds: 60,       unit: "minute" },
+    { seconds: 1,        unit: "second" }
+  ];
 
-    let divisor = 1;
-    let unit = "second";
-
-    for (const [threshold, name] of intervals) {
-        if (seconds < threshold) break;
-        divisor = threshold;
-        unit = name;
+  // 4. Find the first interval that fits
+  for (const { seconds, unit } of intervals) {
+    const count = Math.floor(diffInSeconds / seconds);
+    if (count >= 1) {
+      return `${count} ${unit}${count > 1 ? "s" : ""} ago`;
     }
+  }
 
-    const value = Math.floor(seconds / divisor);
-    if (value <= 0) return "just now";
-
-    return `${value} ${unit}${value !== 1 ? "s" : ""} ago`;
+  // Fallback (shouldn't really happen)
+  return "just now";
 }

@@ -11,6 +11,11 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE messages
+  ALTER COLUMN created_at TYPE timestamptz
+    USING created_at AT TIME ZONE 'UTC';
+
+
 -- INSERT INTO messages (conversation_id, sender_id, content) VALUES ('a3b226b0-46df-4804-9cfb-2f6b688167e7'::UUID, 'd0f2cce3-2891-484d-a29c-814c2994ae25'::UUID, 'Hello Giorgos');
 
 SELECT * FROM messages;
